@@ -10,20 +10,14 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     
-    let defaults = UserDefaults.standard
-    
     var itemArray = [ListItem]()
+    
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        let newItem = ListItem()
-        newItem.title = "Find Mike"
-        itemArray.append(newItem)
         
-//        if let existingItems = defaults.array(forKey: "TodoListArray") as? [String] {
-//            itemArray = existingItems
-//        }
+        loadItems()
         
     }
     
@@ -56,7 +50,7 @@ class TodoListViewController: UITableViewController {
 
         itemArray[indexPath.row].isDone = !itemArray[indexPath.row].isDone
         
-        tableView.reloadData()
+        saveItems()
         
         tableView.deselectRow(at: indexPath, animated: true)
         
@@ -78,9 +72,9 @@ class TodoListViewController: UITableViewController {
             newListItem.title = newItem.text!
             
             self.itemArray.append(newListItem)
-            self.defaults.set(self.itemArray, forKey: "TodoListArray")
-            self.tableView.reloadData()
             
+            self.saveItems()
+
         }
         
         alert.addTextField { (alertTextField) in
@@ -93,6 +87,37 @@ class TodoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
         
     }
+    
+    //MARK: - Model Manipulation Methods
+    
+    func saveItems() {
+        
+        let encoder = PropertyListEncoder()
+        
+        do {
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        }catch{
+            print("Error encoding item array, \(error)")
+        }
+        
+        self.tableView.reloadData()
+        
+    }
+    
+    func loadItems() {
+    
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+            itemArray = try decoder.decode([ListItem].self, from: data)
+            }catch{
+            print("Error decoding item array")
+            }
+        }
+    
+    }
+    
     
 }
 
