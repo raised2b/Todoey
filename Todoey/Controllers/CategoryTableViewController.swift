@@ -31,9 +31,7 @@ class CategoryTableViewController: UITableViewController {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
         
-        let category = categoryArray[indexPath.row]
-        
-        cell.textLabel?.text = category.name
+        cell.textLabel?.text = categoryArray[indexPath.row].name
         
         return cell
         
@@ -53,6 +51,8 @@ class CategoryTableViewController: UITableViewController {
         
         if let indexPath = tableView.indexPathForSelectedRow {
             destinationVC.selectedCategory = categoryArray[indexPath.row]
+        }else{
+            print("Error")
         }
         
     }
@@ -68,10 +68,12 @@ class CategoryTableViewController: UITableViewController {
             print("Error saving category context. Error \(error)")
         }
         
-        self.tableView.reloadData()
+        tableView.reloadData()
     }
     
-    func loadCategoryItems(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
+    func loadCategoryItems() {
+        
+        let request : NSFetchRequest<Category> = Category.fetchRequest()
         
         do {
             categoryArray = try context.fetch(request)
@@ -94,7 +96,7 @@ class CategoryTableViewController: UITableViewController {
             
             let newCategoryItem = Category(context: self.context)
             
-            newCategoryItem.name = alertTextField.text
+            newCategoryItem.name = alertTextField.text!
             
             self.categoryArray.append(newCategoryItem)
             
