@@ -36,8 +36,12 @@ class CategoryTableViewController: SwipeTableViewController {
         
         cell.textLabel?.text = categoryArray?[indexPath.row].name ?? "No Categories"
         
-        cell.backgroundColor = UIColor(hexString: (categoryArray?[indexPath.row].cellColor ?? "0096FF"))
+        guard let categoryColor = UIColor(hexString: (categoryArray?[indexPath.row].cellColor)!) else { fatalError() }
         
+        cell.backgroundColor = categoryColor
+        
+        cell.textLabel?.textColor = ContrastColorOf(categoryColor, returnFlat: true)
+
         return cell
     }
     
