@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     
@@ -24,6 +24,7 @@ class TodoListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+        
     }
     
     //MARK: - Tableview Datasource Methods
@@ -34,22 +35,15 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
-        if let item = todoItems?[indexPath.row] {
-        
-        cell.textLabel?.text = item.title
+        cell.textLabel?.text = todoItems?[indexPath.row].title ?? "No Items"
         
         //Ternary operator ==>
         //value = condition ? valueIfTrue : valueIfFalse
         
-        cell.accessoryType = item.isDone ? .checkmark : .none
+        cell.accessoryType = (todoItems?[indexPath.row].isDone)! ? .checkmark : .none
             
-        }
-        else {
-            cell.textLabel?.text = "No Items Added"
-        }
-        
         return cell
         
     }
@@ -74,6 +68,24 @@ class TodoListViewController: UITableViewController {
 
         }
     }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        
+        if let itemForDeletion = self.todoItems?[indexPath.row] {
+            
+            do{
+                try self.realm.write {
+                    self.realm.delete(itemForDeletion)
+                }
+            }
+            catch {
+                print("Error deleting category. \(error)")
+            }
+            
+        }
+        
+    }
+    
     //MARK: Add new items
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
